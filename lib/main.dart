@@ -1,7 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:instargram_clone_flutter/screens/signup_screen.dart';
+import 'package:instargram_clone_flutter/responsive/mobile_screen_layout.dart';
+import 'package:instargram_clone_flutter/responsive/responsive_layout_screen.dart';
+import 'package:instargram_clone_flutter/responsive/web_screen_layout.dart';
+import 'package:instargram_clone_flutter/screens/login_screen.dart';
 import 'package:instargram_clone_flutter/utils/colors.dart';
 
 void main() async {
@@ -13,9 +17,9 @@ void main() async {
             appId: "1:1066564355890:web:a068b4dde8c9571beb392b",
             messagingSenderId: "1066564355890",
             projectId: "instargram-clone-939c9",
-            storageBucket: "instargram-clone-939c9.appspot.com",
-          ),
-        )
+      storageBucket: "instargram-clone-939c9.appspot.com",
+    ),
+  )
       : await Firebase.initializeApp();
   runApp(const MyApp());
 }
@@ -32,11 +36,34 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: mobileBackgroundColor,
       ),
-      home: const SignupScreen(),
-      // const ResponsiveLayout(
-      //   webScreenLayout: WebScreenLayout(),
-      //   mobileScreenLayout: MobileScreenLayout(),
-      // ),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.active) {
+            // Checking if the snapshot has any data or not
+            if (snapshot.hasData) {
+              // if snapshot has data which means user is logged in then we check the width of screen and accordingly display the screen layout
+              return const ResponsiveLayout(
+                mobileScreenLayout: MobileScreenLayout(),
+                webScreenLayout: WebScreenLayout(),
+              );
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text('${snapshot.error}'),
+              );
+            }
+          }
+
+          // means connection to future hasnt been made yet
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          return const LoginScreen();
+        },
+      ),
     );
   }
 }
