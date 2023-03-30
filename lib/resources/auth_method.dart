@@ -94,6 +94,10 @@ class AuthMethods {
       } else {
         res = "Please enter all the fields";
       }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password') {
+        res = "Wrong Password";
+      }
     } catch (err) {
       return err.toString();
     }
