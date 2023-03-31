@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:instargram_clone_flutter/models/user.dart' as model;
 import 'package:instargram_clone_flutter/resources/storage_method.dart';
 
 class AuthMethods {
@@ -46,26 +47,21 @@ class AuthMethods {
         String photoUrl = await StorageMethods()
             .uploadImageToStorage('profilePics', file, false);
 
-        // model.User _user = model.User(
-        //   username: username,
-        //   uid: cred.user!.uid,
-        //   photoUrl: photoUrl,
-        //   email: email,
-        //   bio: bio,
-        //   followers: [],
-        //   following: [],
-        // );
+        model.User _user = model.User(
+          username: username,
+          uid: cred.user!.uid,
+          photoUrl: photoUrl,
+          email: email,
+          bio: bio,
+          followers: [],
+          following: [],
+        );
 
         // adding user in our database
-        await _firestore.collection("users").doc(cred.user!.uid).set({
-          'username': username,
-          'uid': cred.user!.uid,
-          'photoUrl': photoUrl,
-          'email': email,
-          'bio': bio,
-          'followers': [],
-          'following': [],
-        });
+        await _firestore
+            .collection("users")
+            .doc(cred.user!.uid)
+            .set(_user.toJson());
 
         res = "success";
       } else {
